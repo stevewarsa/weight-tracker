@@ -1,6 +1,7 @@
 import {Redirect, Route, Switch} from "react-router-dom";
 import AddEntry from "./pages/AddEntry";
 import TopNav from "./components/nav/TopNav";
+import AllEntries from "./pages/AllEntries";
 
 const App = () => {
   return (
@@ -12,6 +13,9 @@ const App = () => {
               </Route>
               <Route path="/addEntry">
                   <AddEntry/>
+              </Route>
+              <Route path="/allEntries">
+                  <AllEntries/>
               </Route>
           </Switch>
       </>

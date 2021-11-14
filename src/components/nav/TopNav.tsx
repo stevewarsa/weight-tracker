@@ -1,19 +1,24 @@
 // noinspection CheckTagEmptyBody
 
 import { Container, Nav, Navbar} from "react-bootstrap";
-import { useDispatch } from "react-redux";
+import {Link} from "react-router-dom";
+import {useState} from "react";
 
 const TopNav = () => {
-    const dispatch = useDispatch();
+    const [isOpen, setIsOpen] = useState(false);
+    const handleClick = () => {
+        setIsOpen(prevState => !prevState);
+    }
+
     return (
-        <Navbar bg="light" expand="lg">
+        <Navbar expanded={isOpen} bg="light" expand="lg" collapseOnSelect onClick={handleClick}>
             <Container fluid>
                 <Navbar.Brand>Weight Tracker</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav>
-                        <Nav.Link>Add Entry</Nav.Link>
-                        <Nav.Link>View All Entries</Nav.Link>
+                        <Nav.Link as={Link} to="/addEntry" title="Add Entry">Add Entry</Nav.Link>
+                        <Nav.Link as={Link} to="/allEntries" onClick={handleClick}>View All Entries</Nav.Link>
                         <Nav.Link>Charts</Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
