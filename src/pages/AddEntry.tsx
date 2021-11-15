@@ -6,12 +6,15 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import {useHistory} from "react-router-dom";
 import {DateUtils} from "../helpers/date.utils";
+import weightService from "../services/WeightService";
+import SpinnerTimer from "../components/spinner/SpinnerTimer";
 
 const AddEntry = () => {
     const dispatcher = useDispatch();
     let history = useHistory();
     const [state, setState] = useState({dt: DateUtils.formatDate(new Date()), lbs: 200, notes: ""});
     const [dateForUI, setDateForUI] = useState(new Date());
+    const [saving, setSaving] = useState(false);
 
     const handleDate = (date: Date) => {
         setDateForUI(date);
@@ -32,13 +35,20 @@ const AddEntry = () => {
         });
     }
 
-    const handleAddEntry = () => {
+    const handleAddEntry = async () => {
+        setSaving(true);
+        console.log("AddEntry.handleAddEntry - calling weightService.addEntry(state)...");
+        const addEntryResult: any = await weightService.addEntry(state);
+        console.log("AddEntry.handleAddEntry - here is the response:");
+        console.log(addEntryResult);
         dispatcher(stateActions.addWeightEntry(state));
+        setSaving(false);
         history.push("/allEntries");
     }
 
     return (
         <Container className="mt-3">
+            {saving && <SpinnerTimer message="Saving new entry..." />}
             <h3 className="mb-3">Add New Weight Entry</h3>
             <Row className="mb-2">
                 <Col lg="4">

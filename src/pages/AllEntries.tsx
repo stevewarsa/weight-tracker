@@ -10,6 +10,10 @@ import {WeightEntry} from "../models/weight-entry";
 
 const AllEntries = () => {
     const weightEntries: WeightEntry[] = useSelector((st: any) => st.weightEntries);
+
+    const loadEntry = (data) => {
+    }
+
     if (!weightEntries || weightEntries.length === 0) {
         return <h1>No Weight Entries Found - Use Add Entry!</h1>;
     } else {
@@ -24,6 +28,12 @@ const AllEntries = () => {
             }
             return 0;
         });
+        const buttonCellRendererParams = {
+            showUnderline: true,
+            onClick: params => {
+                loadEntry(params.data);
+            }
+        };
         return (
             <Container className="ag-theme-alpine mt-5" style={{height: 400, width: "100%"}}>
                 <AgGridReact
