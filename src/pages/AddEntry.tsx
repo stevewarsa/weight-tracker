@@ -1,13 +1,14 @@
 import {Button, Col, Container, Form, Row} from "react-bootstrap";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useDispatch} from "react-redux";
 import {stateActions} from "../store/index";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import {useHistory} from "react-router-dom";
+import {useHistory, useLocation} from "react-router-dom";
 import {DateUtils} from "../helpers/date.utils";
 import weightService from "../services/WeightService";
 import SpinnerTimer from "../components/spinner/SpinnerTimer";
+import {WeightEntry} from "../models/weight-entry";
 
 const AddEntry = () => {
     const dispatcher = useDispatch();
@@ -15,6 +16,14 @@ const AddEntry = () => {
     const [state, setState] = useState({dt: DateUtils.formatDate(new Date()), lbs: 200, notes: ""});
     const [dateForUI, setDateForUI] = useState(new Date());
     const [saving, setSaving] = useState(false);
+    let location = useLocation();
+    useEffect(() => {
+        if (location.state && location.state.hasOwnProperty("dt")) {
+            // caller is passing in a weight entry to edit...
+            setState(location.state as WeightEntry);
+            setDateForUI(DateUtils.parseDate(state.dt));
+        }
+    }, [state, location]);
 
     const handleDate = (date: Date) => {
         setDateForUI(date);
@@ -56,8 +65,8 @@ const AddEntry = () => {
                 </Col>
             </Row>
             <Row className="mb-2">
-                <Col lg="4" className="me-0"><Form.Control type="number" value={state.lbs} placeholder="Enter Weight" onChange={handleWeight}/></Col>
-                <Col><Form.Text>lbs</Form.Text></Col>
+                <Col className="me-0"><Form.Control type="number" value={state.lbs} placeholder="Enter Weight" onChange={handleWeight}/></Col>
+                <Col className="my-auto"><Form.Text>lbs</Form.Text></Col>
             </Row>
             <Row className="mb-2">
                 <Col lg="4"><textarea className="form-control" value={state.notes} onChange={handleNotes}/></Col>

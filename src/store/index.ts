@@ -1,6 +1,7 @@
 import {configureStore, createSlice} from "@reduxjs/toolkit";
+import {WeightEntry} from "../models/weight-entry";
 
-const initialState = {weightEntries: []};
+const initialState: {weightEntries: WeightEntry[]} = {weightEntries: []};
 
 const state = createSlice({
     name: "state",
@@ -8,6 +9,9 @@ const state = createSlice({
     reducers: {
         addWeightEntry(state, action) {
             state.weightEntries.push(action.payload);
+        },
+        setWeightEntries(state, action) {
+            state.weightEntries = action.payload;
         }
     }
 });
