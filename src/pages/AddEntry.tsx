@@ -15,6 +15,7 @@ const AddEntry = () => {
     let history = useHistory();
     const [state, setState] = useState({dt: DateUtils.formatDate(new Date()), lbs: 200, notes: ""});
     const [dateForUI, setDateForUI] = useState(new Date());
+    const [isUpdate, setIsUpdate] = useState(false);
     const [saving, setSaving] = useState(false);
     let location = useLocation();
     useEffect(() => {
@@ -22,6 +23,7 @@ const AddEntry = () => {
             // caller is passing in a weight entry to edit...
             setState(location.state as WeightEntry);
             setDateForUI(DateUtils.parseDate(state.dt));
+            setIsUpdate(true);
         }
     }, [state, location]);
 
@@ -73,7 +75,7 @@ const AddEntry = () => {
             </Row>
             <Row className="mb-2">
                 <Col>
-                    <Button className="btn btn-primary" onClick={handleAddEntry}>Add Entry</Button>
+                    <Button className="btn btn-primary" onClick={handleAddEntry}>{isUpdate ? "Update Entry" : "Add Entry"}</Button>
                 </Col>
             </Row>
         </Container>
