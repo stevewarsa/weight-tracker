@@ -77,7 +77,7 @@ const AllEntries = () => {
                             valueFormatter={params => params.node.data && params.node.data.notes ? params.node.data.notes : ""}
                             cellRenderer={params => "<span title='" + params.valueFormatted + "'>" + params.valueFormatted + "</span>"}
                             field="notes"
-                            width={200}></AgGridColumn>
+                            width={600}></AgGridColumn>
                     </AgGridReact>
                 </Container>
             );
