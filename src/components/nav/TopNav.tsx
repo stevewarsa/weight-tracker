@@ -19,7 +19,7 @@ const TopNav = () => {
                     <Nav>
                         <Nav.Link as={Link} to="/addEntry" title="Add Entry">Add Entry</Nav.Link>
                         <Nav.Link as={Link} to="/allEntries">View All Entries</Nav.Link>
-                        <Nav.Link>Charts</Nav.Link>
+                        <Nav.Link as={Link} to="/chart">Charts</Nav.Link>
                     </Nav>
                 </Navbar.Collapse>
             </Container>
