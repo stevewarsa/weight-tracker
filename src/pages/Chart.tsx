@@ -12,10 +12,13 @@ import {
 } from 'chart.js';
 import {Line} from 'react-chartjs-2';
 import {WeightEntry} from "../models/weight-entry";
-import {useSelector} from "react-redux";
-import {useEffect, useRef, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {useEffect, useState} from "react";
 import {DateUtils} from "../helpers/date.utils";
 import {Button, ButtonGroup, Col, Container, Dropdown, DropdownButton, Row} from "react-bootstrap";
+import weightService from "../services/WeightService";
+import {stateActions} from "../store";
+import SpinnerTimer from "../components/spinner/SpinnerTimer";
 
 ChartJS.register(
     CategoryScale,
@@ -40,13 +43,41 @@ export const options = {
 };
 
 const getYear = (weightEntry: WeightEntry) => DateUtils.parseDate(weightEntry.dt).getFullYear();
+const sortWeightEntries = (weightEntries: WeightEntry[]) => {
+    if (!weightEntries || weightEntries.length === 0) {
+        return weightEntries;
+    } else {
+        return weightEntries.sort((w1, w2) => {
+            if (DateUtils.equals(w1.dt, w2.dt)) {
+                return 0;
+            } else if (DateUtils.isBefore(w1.dt, w2.dt)) {
+                return -1;
+            } else {
+                return 1;
+            }
+        });
+    }
+};
+const sortDates = (dates: string[]) => {
+    return dates.sort((dt1, dt2) => {
+        if (DateUtils.equals(dt1, dt2)) {
+            return 0;
+        } else if (DateUtils.isBefore(dt1, dt2)) {
+            return -1;
+        } else {
+            return 1;
+        }
+    });
+};
 
 const Chart = () => {
+    const dispatch = useDispatch();
     const weightEntries: WeightEntry[] = useSelector((st: any) => st.weightEntries);
     const [yearFilter, setYearFilter] = useState("All Years");
     const [weightChartData, setWeightChartData] = useState([]);
-    const allLabels: string[] = weightEntries.map((we: WeightEntry) => we.dt);
+    const allLabels: string[] = sortDates(weightEntries.map((we: WeightEntry) => we.dt));
     const [weightChartLabels, setWeightChartLabels] = useState([]);
+    const [busy, setBusy] = useState({state: false, message: ""});
     const uniqueYears: number[] = [];
     weightEntries.map(w => getYear(w)).forEach(y => !uniqueYears.includes(y) ? uniqueYears.push(y) : () => {});
     let data = {
@@ -61,6 +92,16 @@ const Chart = () => {
         ]
     };
     useEffect(() => {
+        if (!weightEntries || weightEntries.length === 0) {
+            const callServer = async () => {
+                setBusy({state: true, message: "Loading weight entries from DB..."});
+                const locWeightEntriesData: any = await weightService.getEntries();
+                dispatch(stateActions.setWeightEntries(sortWeightEntries(locWeightEntriesData.data)));
+                setBusy({state: false, message: ""});
+            };
+            callServer();
+        }
+
         setWeightChartData(weightEntries.map(we => we.lbs));
         setWeightChartLabels(allLabels);
     }, [weightEntries]);
@@ -69,7 +110,7 @@ const Chart = () => {
         setYearFilter(year);
         const filteredWeightEntries = weightEntries.filter(we => getYear(we) === parseInt(year));
         setWeightChartData(filteredWeightEntries.map(we => we.lbs));
-        setWeightChartLabels(filteredWeightEntries.map((we: WeightEntry) => we.dt));
+        setWeightChartLabels(sortDates(filteredWeightEntries.map((we: WeightEntry) => we.dt)));
     };
 
     const handleAll = () => {
@@ -78,8 +119,10 @@ const Chart = () => {
         setWeightChartLabels(allLabels);
     };
 
-    return (
-        <>
+    if (busy.state) {
+        return <SpinnerTimer key="loading-weight-entries" message={busy.message} />;
+    } else {
+        return (
             <Container>
                 <Row className="mt-2">
                     <Col lg="1" className="me-2">
@@ -89,7 +132,8 @@ const Chart = () => {
                             title={yearFilter}
                             onSelect={handleYear}
                         >
-                            {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y} eventKey={y}>{y}</Dropdown.Item>)}
+                            {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y}
+                                                                                           eventKey={y}>{y}</Dropdown.Item>)}
                         </DropdownButton>
                     </Col>
                     {"All Years" !== yearFilter && <Col lg="2"><Button onClick={handleAll}>All Years</Button></Col>}
@@ -100,8 +144,8 @@ const Chart = () => {
                     </Col>
                 </Row>
             </Container>
-        </>
-    );
+        );
+    }
 };
 
 export default Chart;
