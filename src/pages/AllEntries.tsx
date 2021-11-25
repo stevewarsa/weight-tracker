@@ -19,6 +19,7 @@ const AllEntries = () => {
     let history = useHistory();
     const weightEntries: WeightEntry[] = useSelector((st: any) => st.weightEntries);
     const [busy, setBusy] = useState({state: false, message: ""});
+    const [gridApi, setGridApi] = useState(null);
     useEffect(() => {
         const callServer = async () => {
             setBusy({state: true, message: "Loading weight entries from DB..."});
@@ -33,6 +34,14 @@ const AllEntries = () => {
     const loadEntry = (data: WeightEntry) => {
         history.push({pathname: "/addEntry", state: data});
     }
+
+    const handleQuickFilter = event => {
+        gridApi.setQuickFilter(event.target.value);
+    }
+
+    const onGridReady = params => {
+        setGridApi(params.api);
+    };
 
     if (busy.state) {
         return <SpinnerTimer key="loading-weight-entries" message={busy.message} />;
@@ -59,7 +68,13 @@ const AllEntries = () => {
             };
             return (
                 <Container className="ag-theme-alpine mt-5" style={{height: 400, width: "100%"}}>
+                    <input
+                        type="text"
+                        placeholder="Quick Filter"
+                        onChange={handleQuickFilter}
+                    />
                     <AgGridReact
+                        onGridReady={onGridReady}
                         rowData={locWeightEntries}>
                         <AgGridColumn
                             cellRenderer={ButtonCellRenderer}
@@ -67,7 +82,7 @@ const AllEntries = () => {
                             headerName="Date"
                             headerTooltip="Date"
                             cellStyle={{cursor: "pointer"}}
-                            width={110}
+                            width={120}
                             field="dt">
                         </AgGridColumn>
 
@@ -77,7 +92,7 @@ const AllEntries = () => {
                             valueFormatter={params => params.node.data && params.node.data.notes ? params.node.data.notes : ""}
                             cellRenderer={params => "<span title='" + params.valueFormatted + "'>" + params.valueFormatted + "</span>"}
                             field="notes"
-                            width={600}></AgGridColumn>
+                            width={1500}></AgGridColumn>
                     </AgGridReact>
                 </Container>
             );
