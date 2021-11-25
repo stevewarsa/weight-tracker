@@ -39,9 +39,7 @@ export const options = {
     },
 };
 
-const getYear = (weightEntry: WeightEntry) => {
-    return DateUtils.parseDate(weightEntry.dt).getFullYear();
-};
+const getYear = (weightEntry: WeightEntry) => DateUtils.parseDate(weightEntry.dt).getFullYear();
 
 const Chart = () => {
     const weightEntries: WeightEntry[] = useSelector((st: any) => st.weightEntries);
@@ -71,20 +69,20 @@ const Chart = () => {
         setYearFilter(year);
         const filteredWeightEntries = weightEntries.filter(we => getYear(we) === parseInt(year));
         setWeightChartData(filteredWeightEntries.map(we => we.lbs));
-        setWeightChartLabels(filteredWeightEntries.map((we: WeightEntry) => we.dt))
+        setWeightChartLabels(filteredWeightEntries.map((we: WeightEntry) => we.dt));
     };
 
     const handleAll = () => {
         setYearFilter("All Years");
         setWeightChartData(weightEntries.map(we => we.lbs));
-        data.labels = allLabels;
+        setWeightChartLabels(allLabels);
     };
 
     return (
         <>
             <Container>
-                <Row>
-                    <Col>
+                <Row className="mt-2">
+                    <Col lg="1" className="me-2">
                         <DropdownButton
                             as={ButtonGroup}
                             variant="primary"
@@ -94,7 +92,7 @@ const Chart = () => {
                             {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y} eventKey={y}>{y}</Dropdown.Item>)}
                         </DropdownButton>
                     </Col>
-                    <Col><Button onClick={handleAll}>All Years</Button></Col>
+                    {"All Years" !== yearFilter && <Col lg="2"><Button onClick={handleAll}>All Years</Button></Col>}
                 </Row>
                 <Row>
                     <Col>
