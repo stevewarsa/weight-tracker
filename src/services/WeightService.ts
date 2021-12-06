@@ -9,7 +9,6 @@ class WeightService {
     public addEntry(entry: WeightEntry) {
         return axios.post("/weight-tracker/server/add_weight_entry.php", entry);
     }
-
 }
 
 export default new WeightService();
