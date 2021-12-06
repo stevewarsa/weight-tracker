@@ -15,7 +15,7 @@ import {WeightEntry} from "../models/weight-entry";
 import {useDispatch, useSelector} from "react-redux";
 import {useEffect, useState} from "react";
 import {DateUtils} from "../helpers/date.utils";
-import {Button, ButtonGroup, Col, Container, Dropdown, DropdownButton, Row} from "react-bootstrap";
+import {ButtonGroup, Col, Container, Dropdown, DropdownButton, Row} from "react-bootstrap";
 import weightService from "../services/WeightService";
 import {stateActions} from "../store";
 import SpinnerTimer from "../components/spinner/SpinnerTimer";
@@ -41,6 +41,8 @@ export const options = {
         },
     },
 };
+const ALL_YEARS = "All Years";
+const LAST_30_DAYS = "Last 30 Days";
 
 const getYear = (weightEntry: WeightEntry) => DateUtils.parseDate(weightEntry.dt).getFullYear();
 const sortWeightEntries = (weightEntries: WeightEntry[]) => {
@@ -73,7 +75,7 @@ const sortDates = (dates: string[]) => {
 const Chart = () => {
     const dispatch = useDispatch();
     const weightEntries: WeightEntry[] = useSelector((st: any) => st.weightEntries);
-    const [yearFilter, setYearFilter] = useState("All Years");
+    const [yearFilter, setYearFilter] = useState(LAST_30_DAYS);
     const [weightChartData, setWeightChartData] = useState([]);
     const allLabels: string[] = sortDates(weightEntries.map((we: WeightEntry) => we.dt));
     const [weightChartLabels, setWeightChartLabels] = useState([]);
@@ -101,22 +103,38 @@ const Chart = () => {
             };
             callServer();
         }
+        handleYear(yearFilter);
+    }, [weightEntries, yearFilter]);
 
-        setWeightChartData(weightEntries.map(we => we.lbs));
-        setWeightChartLabels(allLabels);
-    }, [weightEntries]);
-
-    const handleYear = (year) => {
-        setYearFilter(year);
-        const filteredWeightEntries = weightEntries.filter(we => getYear(we) === parseInt(year));
-        setWeightChartData(filteredWeightEntries.map(we => we.lbs));
-        setWeightChartLabels(sortDates(filteredWeightEntries.map((we: WeightEntry) => we.dt)));
+    const handleYear = (year: string) => {
+        if (year === ALL_YEARS) {
+            handleAll();
+        } else if (year === LAST_30_DAYS) {
+            handleLast30Days();
+        } else {
+            // this is a real numeric year
+            setYearFilter(year);
+            const filteredWeightEntries = weightEntries.filter(we => getYear(we) === parseInt(year));
+            setWeightChartData(filteredWeightEntries.map(we => we.lbs));
+            setWeightChartLabels(sortDates(filteredWeightEntries.map((we: WeightEntry) => we.dt)));
+        }
     };
 
     const handleAll = () => {
-        setYearFilter("All Years");
+        setYearFilter(ALL_YEARS);
         setWeightChartData(weightEntries.map(we => we.lbs));
         setWeightChartLabels(allLabels);
+    };
+
+    const handleLast30Days = () => {
+        setYearFilter(LAST_30_DAYS);
+        const filteredWeightEntries = weightEntries.filter(we => {
+            const weightEntryDt = DateUtils.parseDate(we.dt);
+            const thirtyDaysAgo = DateUtils.subtractDays(new Date(), 30);
+            return DateUtils.equals(weightEntryDt, thirtyDaysAgo) || DateUtils.isAfter(weightEntryDt, thirtyDaysAgo);
+        });
+        setWeightChartData(filteredWeightEntries.map(we => we.lbs));
+        setWeightChartLabels(sortDates(filteredWeightEntries.map((we: WeightEntry) => we.dt)));
     };
 
     if (busy.state) {
@@ -125,18 +143,18 @@ const Chart = () => {
         return (
             <Container>
                 <Row className="mt-2">
-                    <Col lg="1" className="me-2">
+                    <div className="me-2 col">
                         <DropdownButton
                             as={ButtonGroup}
                             variant="primary"
                             title={yearFilter}
                             onSelect={handleYear}
                         >
-                            {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y}
-                                                                                           eventKey={y}>{y}</Dropdown.Item>)}
+                            {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y} eventKey={y}>{y}</Dropdown.Item>)}
+                            <Dropdown.Item key={ALL_YEARS} eventKey={ALL_YEARS}>{ALL_YEARS}</Dropdown.Item>
+                            <Dropdown.Item key={LAST_30_DAYS} eventKey={LAST_30_DAYS}>{LAST_30_DAYS}</Dropdown.Item>
                         </DropdownButton>
-                    </Col>
-                    {"All Years" !== yearFilter && <Col lg="2"><Button onClick={handleAll}>All Years</Button></Col>}
+                    </div>
                 </Row>
                 <Row>
                     <Col>
