@@ -1,4 +1,5 @@
-<?php
+<?php /** @noinspection SqlResolve */
+/** @noinspection SqlNoDataSourceInspection */
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PATCH, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept');
@@ -12,8 +13,6 @@ if (empty($request)) {
 error_log("add_weight_entry.php - Here is the JSON received: ");
 error_log($request);
 $weightEntry = json_decode($request);
-
-error_log("add_weight_entry.php - Received data: uid=" . $uid . ", id=" . $weightEntry->id . ", category=" . $weightEntry->category . ", title=" . $weightEntry->title . ", description=" . $weightEntry->description . ", status=" . $weightEntry->status);
 
 // now insert or update this weightEntry
 $db = null;
@@ -50,5 +49,4 @@ if (file_exists($filename)) {
 	error_log("add_weight_entry.php - No database file " . $filename);
 	print_r(json_encode("error|There is no database named " . $filename));
 }
-
 ?>
