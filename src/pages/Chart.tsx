@@ -79,6 +79,14 @@ const Chart = () => {
     const [weightChartData, setWeightChartData] = useState([]);
     const allLabels: string[] = sortDates(weightEntries.map((we: WeightEntry) => we.dt));
     const [weightChartLabels, setWeightChartLabels] = useState([]);
+    const [statsForPeriod, setStatsForPeriod] = useState({
+        maxWeight: 0,
+        minWeight: 0,
+        weightLost: 0,
+        weightGained: 0,
+        weightLostFromMaxToMin: 0,
+        weightGainedFromMinToMax: 0
+    });
     const [busy, setBusy] = useState({state: false, message: ""});
     const uniqueYears: number[] = [];
     weightEntries.map(w => getYear(w)).forEach(y => !uniqueYears.includes(y) ? uniqueYears.push(y) : () => {});
@@ -108,9 +116,18 @@ const Chart = () => {
 
     const handleYear = (year: string) => {
         if (year === ALL_YEARS) {
-            handleAll();
+            setYearFilter(ALL_YEARS);
+            setWeightChartData(weightEntries.map(we => we.lbs));
+            setWeightChartLabels(allLabels);
         } else if (year === LAST_30_DAYS) {
-            handleLast30Days();
+            setYearFilter(LAST_30_DAYS);
+            const filteredWeightEntries = weightEntries.filter(we => {
+                const weightEntryDt = DateUtils.parseDate(we.dt);
+                const thirtyDaysAgo = DateUtils.subtractDays(new Date(), 30);
+                return DateUtils.equals(weightEntryDt, thirtyDaysAgo) || DateUtils.isAfter(weightEntryDt, thirtyDaysAgo);
+            });
+            setWeightChartData(filteredWeightEntries.map(we => we.lbs));
+            setWeightChartLabels(sortDates(filteredWeightEntries.map((we: WeightEntry) => we.dt)));
         } else {
             // this is a real numeric year
             setYearFilter(year);
@@ -118,23 +135,6 @@ const Chart = () => {
             setWeightChartData(filteredWeightEntries.map(we => we.lbs));
             setWeightChartLabels(sortDates(filteredWeightEntries.map((we: WeightEntry) => we.dt)));
         }
-    };
-
-    const handleAll = () => {
-        setYearFilter(ALL_YEARS);
-        setWeightChartData(weightEntries.map(we => we.lbs));
-        setWeightChartLabels(allLabels);
-    };
-
-    const handleLast30Days = () => {
-        setYearFilter(LAST_30_DAYS);
-        const filteredWeightEntries = weightEntries.filter(we => {
-            const weightEntryDt = DateUtils.parseDate(we.dt);
-            const thirtyDaysAgo = DateUtils.subtractDays(new Date(), 30);
-            return DateUtils.equals(weightEntryDt, thirtyDaysAgo) || DateUtils.isAfter(weightEntryDt, thirtyDaysAgo);
-        });
-        setWeightChartData(filteredWeightEntries.map(we => we.lbs));
-        setWeightChartLabels(sortDates(filteredWeightEntries.map((we: WeightEntry) => we.dt)));
     };
 
     if (busy.state) {
@@ -150,9 +150,9 @@ const Chart = () => {
                             title={yearFilter}
                             onSelect={handleYear}
                         >
-                            {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y} eventKey={y}>{y}</Dropdown.Item>)}
                             <Dropdown.Item key={ALL_YEARS} eventKey={ALL_YEARS}>{ALL_YEARS}</Dropdown.Item>
                             <Dropdown.Item key={LAST_30_DAYS} eventKey={LAST_30_DAYS}>{LAST_30_DAYS}</Dropdown.Item>
+                            {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y} eventKey={y}>{y}</Dropdown.Item>)}
                         </DropdownButton>
                     </div>
                 </Row>
