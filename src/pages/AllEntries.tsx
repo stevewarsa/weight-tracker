@@ -12,11 +12,11 @@ import weightService from "../services/WeightService";
 import SpinnerTimer from "../components/spinner/SpinnerTimer";
 import {stateActions} from "../store";
 import {ButtonCellRenderer} from "../renderers/button.cell.renderer";
-import {useHistory} from "react-router-dom";
+import { useNavigate } from 'react-router-dom';
 
 const AllEntries = () => {
+    const navigate = useNavigate();
     const dispatch = useDispatch();
-    let history = useHistory();
     const weightEntries: WeightEntry[] = useSelector((st: any) => st.weightEntries);
     const [busy, setBusy] = useState({state: false, message: ""});
     const [gridApi, setGridApi] = useState(null);
@@ -32,7 +32,7 @@ const AllEntries = () => {
 
 
     const loadEntry = (data: WeightEntry) => {
-        history.push({pathname: "/addEntry", state: data});
+        navigate("/addEntry", {state: data});
     }
 
     const handleQuickFilter = event => {
@@ -67,7 +67,7 @@ const AllEntries = () => {
                 }
             };
             return (
-                <Container className="ag-theme-alpine mt-5" style={{height: 400, width: "100%"}}>
+                <Container className="ag-theme-alpine" style={{height: 400, width: "100%"}}>
                     <input
                         type="text"
                         placeholder="Quick Filter"
@@ -75,7 +75,9 @@ const AllEntries = () => {
                     />
                     <AgGridReact
                         onGridReady={onGridReady}
-                        rowData={locWeightEntries}>
+                        rowData={locWeightEntries}
+                        pagination={true}
+                        paginationPageSize={5}>
                         <AgGridColumn
                             cellRenderer={ButtonCellRenderer}
                             cellRendererParams={buttonCellRendererParams}
@@ -86,13 +88,17 @@ const AllEntries = () => {
                             field="dt">
                         </AgGridColumn>
 
-                        <AgGridColumn headerName="LBS" field="lbs" width={75}/>
+                        <AgGridColumn headerName="LBS" field="lbs" width={70}/>
                         <AgGridColumn
                             headerName="Notes"
                             valueFormatter={params => params.node.data && params.node.data.notes ? params.node.data.notes : ""}
-                            cellRenderer={params => "<span title='" + params.valueFormatted + "'>" + params.valueFormatted + "</span>"}
+                            cellRenderer={params => params.valueFormatted}
                             field="notes"
-                            width={1500}></AgGridColumn>
+                            width={500}
+                            wrapText={true}
+                            autoHeight={true}>
+
+                        </AgGridColumn>
                     </AgGridReact>
                 </Container>
             );

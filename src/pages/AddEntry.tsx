@@ -4,7 +4,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {stateActions} from "../store/index";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import {useHistory, useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {DateUtils} from "../helpers/date.utils";
 import weightService from "../services/WeightService";
 import SpinnerTimer from "../components/spinner/SpinnerTimer";
@@ -14,7 +14,7 @@ const AddEntry = () => {
     const dispatcher = useDispatch();
     const weightEntries = useSelector((state: any) => state.weightEntries);
     const notesRef = useRef<HTMLTextAreaElement>();
-    let history = useHistory();
+    const navigate = useNavigate();
     const [addEntryState, setAddEntryState] = useState({
         weightEntry: {dt: DateUtils.formatDate(new Date()), lbs: 200, notes: ""},
         dateForUI: new Date(),
@@ -91,7 +91,7 @@ const AddEntry = () => {
         } else {
             dispatcher(stateActions.addWeightEntry(addEntryResult.data));
             updateBusy(false, "");
-            history.push("/allEntries");
+            navigate("/allEntries");
         }
     }
 

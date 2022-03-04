@@ -8,4 +8,10 @@ import {BrowserRouter} from "react-router-dom";
 import {Provider} from "react-redux";
 import store from "./store/index";
 
-ReactDOM.render(<BrowserRouter basename="/weight-tracker"><Provider store={store}><App /></Provider></BrowserRouter>, document.getElementById('root'));
+const { NODE_ENV } = process.env;
+
+ReactDOM.render(
+    <BrowserRouter basename={NODE_ENV && NODE_ENV === "development" ? "" : "/weight-tracker"}>
+        <Provider store={store}><App /></Provider>
+    </BrowserRouter>,
+    document.getElementById('root'));
