@@ -188,12 +188,17 @@ const Chart = () => {
                             {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y} eventKey={y}>{y}</Dropdown.Item>)}
                         </DropdownButton>
                     </div>
-                    <div className="col">
+                </Row>
+                <Row className="mt-2">
+                    <Col>Start/End Date</Col>
+                </Row>
+                <Row className="mt-2">
+                    <Col className="w-50">
                         <DatePicker selected={startDateForUI} onChange={handleStartDate} />
-                    </div>
-                    <div className="col">
+                    </Col>
+                    <Col className="w-50">
                         <DatePicker selected={endDateForUI} onChange={handleEndDate} />
-                    </div>
+                    </Col>
                 </Row>
                 <Row>
                     <Col>
