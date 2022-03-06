@@ -86,6 +86,8 @@ const Chart = () => {
     const [statsForPeriod, setStatsForPeriod] = useState({
         maxWeight: 0,
         minWeight: 0,
+        startWeight: 0,
+        endWeight: 0,
         weightLost: 0,
         weightGained: 0,
         weightLostFromMaxToMin: 0,
@@ -156,6 +158,50 @@ const Chart = () => {
         }
     };
 
+    useEffect(() => {
+        console.log("useEffect - here is the weightChartData:", weightChartData);
+        if (!weightChartData || weightChartData.length === 0) {
+            return;
+        }
+        // weight chart data changed, so calculate other data
+        const startingWeight = weightChartData[0];
+        const endingWeight = weightChartData[weightChartData.length - 1];
+        console.log("startingWeight=" + startingWeight + ",endingWeight=" + endingWeight);
+        const gained = endingWeight > startingWeight;
+        const gainedAmt = endingWeight - startingWeight;
+        const lost = startingWeight > endingWeight;
+        const lostAmt = startingWeight - endingWeight;
+        const stayedSame = startingWeight === endingWeight;
+        let maxWeightForPeriod = 0;
+        let dateForMaxWeight = weightChartLabels[0];
+        let minWeightForPeriod = 1000;
+        let dateForMinWeight = weightChartLabels[weightChartLabels.length - 1];
+        for (let i = 0; i < weightChartData.length; i++) {
+            const we = {lbs: weightChartData[i], dt: weightChartLabels[i]};
+            if (we.lbs > maxWeightForPeriod) {
+                maxWeightForPeriod = we.lbs;
+                dateForMaxWeight = we.dt;
+            }
+            if (we.lbs < minWeightForPeriod) {
+                minWeightForPeriod = we.lbs;
+                dateForMinWeight = we.dt;
+            }
+        }
+        const weightLostFromMaxToMin = DateUtils.isBefore(dateForMaxWeight, dateForMinWeight);
+        const weightGainedFromMinToMax = DateUtils.isAfter(dateForMaxWeight, dateForMinWeight);
+        const statsForPeriod = {
+            maxWeight: maxWeightForPeriod,
+            minWeight: minWeightForPeriod,
+            startWeight: startingWeight,
+            endWeight: endingWeight,
+            weightLost: stayedSame || gained ? 0 : lostAmt,
+            weightGained: stayedSame || lost ? 0 : gainedAmt,
+            weightLostFromMaxToMin: weightLostFromMaxToMin ? maxWeightForPeriod - minWeightForPeriod : 0,
+            weightGainedFromMinToMax: weightGainedFromMinToMax ? maxWeightForPeriod - minWeightForPeriod : 0
+        };
+        setStatsForPeriod(statsForPeriod);
+    }, [weightChartData]);
+
     const handleStartDate = (date: Date) => {
         setStartDateForUI(date);
         if (date && endDateForUI) {
@@ -175,7 +221,7 @@ const Chart = () => {
         return (
             <Container>
                 <Row className="mt-2">
-                    <div className="me-2 col">
+                    <Col className="me-2">
                         <DropdownButton
                             as={ButtonGroup}
                             variant="primary"
@@ -187,7 +233,35 @@ const Chart = () => {
                             <Dropdown.Item key={CUSTOM} eventKey={CUSTOM}>{CUSTOM}</Dropdown.Item>
                             {uniqueYears.length > 0 && uniqueYears.map(y => <Dropdown.Item key={y} eventKey={y}>{y}</Dropdown.Item>)}
                         </DropdownButton>
-                    </div>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        Start wt: {statsForPeriod.startWeight}
+                    </Col>
+                    <Col>
+                        End wt: {statsForPeriod.endWeight}
+                    </Col>
+                    <Col>
+                        Wt Lost: {statsForPeriod.weightLost.toFixed(2)}
+                    </Col>
+                    <Col>
+                        Wt Gain: {statsForPeriod.weightGained.toFixed(2)}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        Max wt: {statsForPeriod.maxWeight}
+                    </Col>
+                    <Col>
+                        Min wt: {statsForPeriod.minWeight}
+                    </Col>
+                    <Col>
+                        Max-&gt;Min: {statsForPeriod.weightLostFromMaxToMin.toFixed(2)}
+                    </Col>
+                    <Col>
+                        Min-&gt;Max: {statsForPeriod.weightGainedFromMinToMax.toFixed(2)}
+                    </Col>
                 </Row>
                 <Row className="mt-2">
                     <Col>Start/End Date</Col>
