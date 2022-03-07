@@ -91,7 +91,11 @@ const Chart = () => {
         weightLost: 0,
         weightGained: 0,
         weightLostFromMaxToMin: 0,
-        weightGainedFromMinToMax: 0
+        weightGainedFromMinToMax: 0,
+        startingBmi: 0,
+        endingBmi: 0,
+        maxBmi: 0,
+        minBmi: 0
     });
     const [busy, setBusy] = useState({state: false, message: ""});
     const uniqueYears: number[] = [];
@@ -158,6 +162,13 @@ const Chart = () => {
         }
     };
 
+    const calculateBmi = (weight: number, heightInches: number) => {
+        let bmi = weight * 703;
+        bmi = bmi / heightInches;
+        bmi = bmi / heightInches;
+        return bmi;
+    };
+
     useEffect(() => {
         console.log("useEffect - here is the weightChartData:", weightChartData);
         if (!weightChartData || weightChartData.length === 0) {
@@ -197,7 +208,11 @@ const Chart = () => {
             weightLost: stayedSame || gained ? 0 : lostAmt,
             weightGained: stayedSame || lost ? 0 : gainedAmt,
             weightLostFromMaxToMin: weightLostFromMaxToMin ? maxWeightForPeriod - minWeightForPeriod : 0,
-            weightGainedFromMinToMax: weightGainedFromMinToMax ? maxWeightForPeriod - minWeightForPeriod : 0
+            weightGainedFromMinToMax: weightGainedFromMinToMax ? maxWeightForPeriod - minWeightForPeriod : 0,
+            startingBmi: calculateBmi(startingWeight, 72),
+            endingBmi: calculateBmi(endingWeight, 72),
+            maxBmi: calculateBmi(maxWeightForPeriod, 72),
+            minBmi: calculateBmi(minWeightForPeriod, 72)
         };
         setStatsForPeriod(statsForPeriod);
     }, [weightChartData]);
@@ -237,30 +252,44 @@ const Chart = () => {
                 </Row>
                 <Row>
                     <Col>
-                        Start wt: {statsForPeriod.startWeight}
+                        <span className="fw-bold">Start wt:</span> {statsForPeriod.startWeight}
                     </Col>
                     <Col>
-                        End wt: {statsForPeriod.endWeight}
+                        <span className="fw-bold">End wt:</span> {statsForPeriod.endWeight}
                     </Col>
                     <Col>
-                        Wt Lost: {statsForPeriod.weightLost.toFixed(2)}
+                        <span className="fw-bold">Wt Lost:</span> {statsForPeriod.weightLost.toFixed(2)}
                     </Col>
                     <Col>
-                        Wt Gain: {statsForPeriod.weightGained.toFixed(2)}
+                        <span className="fw-bold">Wt Gain:</span> {statsForPeriod.weightGained.toFixed(2)}
                     </Col>
                 </Row>
                 <Row>
                     <Col>
-                        Max wt: {statsForPeriod.maxWeight}
+                        <span className="fw-bold">Max wt:</span> {statsForPeriod.maxWeight}
                     </Col>
                     <Col>
-                        Min wt: {statsForPeriod.minWeight}
+                        <span className="fw-bold">Min wt:</span> {statsForPeriod.minWeight}
                     </Col>
                     <Col>
-                        Max-&gt;Min: {statsForPeriod.weightLostFromMaxToMin.toFixed(2)}
+                        <span className="fw-bold">Max-&gt;Min:</span> {statsForPeriod.weightLostFromMaxToMin.toFixed(2)}
                     </Col>
                     <Col>
-                        Min-&gt;Max: {statsForPeriod.weightGainedFromMinToMax.toFixed(2)}
+                        <span className="fw-bold">Min-&gt;Max:</span> {statsForPeriod.weightGainedFromMinToMax.toFixed(2)}
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <span className="fw-bold">Start BMI:</span> {statsForPeriod.startingBmi.toFixed(1)}
+                    </Col>
+                    <Col>
+                        <span className="fw-bold">End BMI:</span> {statsForPeriod.endingBmi.toFixed(1)}
+                    </Col>
+                    <Col>
+                        <span className="fw-bold">Max BMI:</span> {statsForPeriod.maxBmi.toFixed(1)}
+                    </Col>
+                    <Col>
+                        <span className="fw-bold">Min BMI:</span> {statsForPeriod.minBmi.toFixed(1)}
                     </Col>
                 </Row>
                 <Row className="mt-2">
